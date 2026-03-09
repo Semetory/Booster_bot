@@ -34,6 +34,28 @@ public class Main {
         try {
             bot.setUpdatesListener(updates -> {
                 for (Update update : updates) {
+                    if (update.message() != null && "/boost".equals(update.message().text())) {
+                        long chatId = update.message().chat().id();
+                        String name = update.message().from().firstName();
+                        String text = update.message().text();
+
+                        // Создаем контекст, передавая туда chatId
+                        //UserContext context = new UserContext(chatId, name, text);
+
+                        UserContext context = new UserContext(update.message().from().firstName(), update.message().text());
+
+                        FilterPipeline pipeline = new FilterPipeline();
+                        pipeline.addFilter(new TimeOfDayFilter());
+                        pipeline.addFilter(new WeekdayFilter());
+                        pipeline.addFilter(new MoodDetectorFilter());
+
+                        ComplimentGeneratorFilter generator = new ComplimentGeneratorFilter();
+                        pipeline.process(context); // Запуск цепочки
+                        generator.execute(context); // Генерация итога
+
+                        bot.execute(new SendMessage(chatId, generator.result));
+                        System.out.println("[LOG] Контекст пользователя: " + context.tags);
+                    }
                     if (update.message() != null && "/compliment".equals(update.message().text())) {
 
                         //Данные пользователя
@@ -50,7 +72,7 @@ public class Main {
                 }
                 return UpdatesListener.CONFIRMED_UPDATES_ALL;
             });
-        } catch (Throwable _) { System.out.println("[LOG] Возникло исключение при попытке подключения к телеграм ");; }
+        } catch (Throwable _) { System.out.println("[LOG] Возникло исключение при попытке подключения к телеграм "); }
         finally { System.out.println("[LOG] Выполнено подключение к телеграм - блок (bot.setUpdatesListener)"); }
     }
 }
