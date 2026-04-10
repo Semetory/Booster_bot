@@ -20,7 +20,6 @@ public class Main {
     );
 
     public static void main(String[] args) {
-
         Scanner in = new Scanner(System.in);
 
         System.out.println("Введите токен:");
@@ -31,26 +30,31 @@ public class Main {
 
         System.out.println("[LOG] Бот запущен...");
 
-        try {
-            bot.setUpdatesListener(updates -> {
-                for (Update update : updates) {
-                    if (update.message() != null && "/compliment".equals(update.message().text())) {
+        bot.setUpdatesListener(updates -> {
+            for (Update update : updates) {
+                try {
+                    if (update.message() != null &&
+                            update.message().text() != null &&
+                            "/compliment".equals(update.message().text())) {
 
-                        //Данные пользователя
                         String firstName = update.message().from().firstName();
                         long chatId = update.message().chat().id();
 
-                        //Выбор случайного комплимента
                         String randomCompliment = COMPLIMENTS.get(random.nextInt(COMPLIMENTS.size()));
                         String responseText = firstName + ", " + randomCompliment;
 
-                        bot.execute(new SendMessage(chatId, responseText)); //Отправка ответа
-                        System.out.println("[LOG] Отправлен комплимент пользователю: " + firstName + " (ID: " + chatId + ")");
+                        bot.execute(new SendMessage(chatId, responseText));
+                        System.out.println("[LOG] Отправлен комплимент пользователю: " + firstName);
                     }
+                } catch (Exception e) {
+                    System.out.println("[LOG] Ошибка при обработке сообщения: " + e.getMessage());
                 }
-                return UpdatesListener.CONFIRMED_UPDATES_ALL;
-            });
-        } catch (Throwable _) { System.out.println("[LOG] Возникло исключение при попытке подключения к телеграм ");; }
-        finally { System.out.println("[LOG] Выполнено подключение к телеграм - блок (bot.setUpdatesListener)"); }
+            }
+            return UpdatesListener.CONFIRMED_UPDATES_ALL;
+        });
+
+        System.out.println("[LOG] Бот готов к работе. Нажмите Enter для остановки...");
+        in.nextLine();
+        System.out.println("[LOG] Бот остановлен");
     }
 }
