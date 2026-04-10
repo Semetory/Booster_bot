@@ -16,13 +16,13 @@ class ComplimentGeneratorFilter implements Filter {
     public String result;
 
     public void execute(UserContext ctx) {
-        // Ищем фразы, подходящие под любой из тегов в контексте
+        //фразы, подходящие под любой из тегов в контексте
         List<String> pool = new ArrayList<>();
         for (String tag : ctx.tags) {
             if (phrases.containsKey(tag)) pool.addAll(phrases.get(tag));
         }
 
-        // Регрессия: если ничего не нашли, берем общую фразу
+        //если ничего не нашли, берем общую фразу
         if (pool.isEmpty()) pool = List.of("ты просто молодец!");
 
         String randomPhrase = pool.get(new Random().nextInt(pool.size()));
